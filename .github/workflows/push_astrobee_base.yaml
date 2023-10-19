@@ -1,0 +1,81 @@
+name: Create astrobee base image - public
+
+on:
+  workflow_dispatch:
+  
+  pull_request:
+    branches:
+      - devel
+      
+env: 
+  # Use docker.io for DockerHub if empty
+  REGISTRY: ghcr.io
+#  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: astrobee_test_base       
+      
+jobs:
+
+  build_astrobee_base_noetic:
+  
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write      
+    steps:
+      # Checkout this repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up docker buildx (latest build magic)       
+      - name: Set up docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Log in to Docker registry
+      - name: Log into registry ${{env.REGISTRY}}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{env.REGISTRY}}
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+        
+      
+      # Extract metadata for docker
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{env.REGISTRY}}/${{env.IMAGE_NAME}}   
+         
+      # Set up SSH key clone private repositories
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
+          
+      # Clone repositories
+#      - name: Clone src.repos
+#        run: |
+#          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+#          git clone git@bitbucket.org:traclabs/guardian.git
+#          pip3 install vcstool
+#          mkdir src
+#          vcs import src < guardian/guardian.repos
+
+          
+      # Build and push docker imag with buildx
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v5
+        with:
+          build-args: SRC_DIR=src
+          context: .
+          file: ./.devcontainer/astrobee_base.Dockerfile
+          push: ${{github.event_name != 'pull_request' }}
+          tags: ${{steps.meta.outputs.tags}}
+          labels: ${{steps.meta.outputs.labels}}
+          no-cache: true
+  
