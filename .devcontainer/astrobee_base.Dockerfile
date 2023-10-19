@@ -9,7 +9,7 @@ ARG ROS_VERSION=noetic
 FROM osrf/ros:${ROS_VERSION}-desktop-full
 
 ARG ROS_VERSION=noetic
-ARG PYTHON=''
+ARG PYTHON='3'
 
 # try to suppress certain warnings during apt-get calls
 ARG DEBIAN_FRONTEND=noninteractive
