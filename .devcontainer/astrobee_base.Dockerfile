@@ -8,7 +8,7 @@ ARG UBUNTU_VERSION=20.04
 ARG ROS_VERSION=noetic
 FROM osrf/ros:${ROS_VERSION}-desktop-full
 
-ARG ROS_VERSION=kinetic
+ARG ROS_VERSION=noetic
 ARG PYTHON=''
 
 # try to suppress certain warnings during apt-get calls
