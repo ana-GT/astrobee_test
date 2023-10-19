@@ -10,8 +10,7 @@ on:
 env: 
   # Use docker.io for DockerHub if empty
   REGISTRY: ghcr.io
-#  IMAGE_NAME: ${{ github.repository }}
-  IMAGE_NAME: astrobee_test_base       
+  IMAGE_NAME: ${{ github.repository }}
       
 jobs:
 
@@ -75,7 +74,8 @@ jobs:
           context: .
           file: ./.devcontainer/astrobee_base.Dockerfile
           push: ${{github.event_name != 'pull_request' }}
-          tags: ${{steps.meta.outputs.tags}}
+#          tags: ${{steps.meta.outputs.tags}}
+          tags: astrobee_base_no_dds-ubuntu20.04
           labels: ${{steps.meta.outputs.labels}}
           no-cache: true
   
